@@ -199,12 +199,11 @@ if __name__ == '__main__':
 
     # save the prediction trajectory
 
-    np.save(f'X_p_{exp_sys}_{init_dist}_to_{target_dist}.npy',X_p.detach().numpy())
-    np.save(f'X_f_{exp_sys}_{init_dist}_to_{target_dist}.npy',X_f.detach().numpy())
-    np.save(f'u_f_{exp_sys}_{init_dist}_to_{target_dist}.npy',u_f.detach().numpy())
-    np.save(f'x_0_{exp_sys}_{init_dist}_to_{target_dist}.npy',x_0.detach().numpy())
-    np.save(f'y_{exp_sys}_{init_dist}_to_{target_dist}.npy',y.detach().numpy())
-    
+    np.save(f'exp_result_data/X_p_{exp_sys}_{init_dist}_to_{target_dist}.npy',X_p.detach().numpy())
+    np.save(f'exp_result_data/X_f_{exp_sys}_{init_dist}_to_{target_dist}.npy',X_f.detach().numpy())
+    # np.save(f'exp_result_data/u_f_{exp_sys}_{init_dist}_to_{target_dist}.npy',u_f.detach().numpy())
+    np.save(f'exp_result_data/x_0_{exp_sys}_{init_dist}_to_{target_dist}.npy',x_0.detach().numpy())
+    np.save(f'exp_result_data/y_{exp_sys}_{init_dist}_to_{target_dist}.npy',y.detach().numpy())
 
 
     
