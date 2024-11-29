@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from torch.distributions import MultivariateNormal
 
 
-def generate_phit(t, n, A, B, sys):
+def generate_phit(t, n, A, B, dt, sys):
     """
     t, A, B are tensors, A, B are the system matrices, sys is the system name
     t shape is (T, N, 1), A shape is (n,n) B shape is (n,m), output shape is (T, N, n, n). this function generates all phi_t from t=0 to t=tf 
@@ -35,7 +35,6 @@ def generate_phit(t, n, A, B, sys):
     elif sys == 'Highdim':
         T, N, _ = t.shape
         phi_t = torch.zeros((T, N, n, n))
-        dt = t[1,0,0] - t[0,0,0]
         for i in range(T):
             phi_t[i] = generate_onetime_phit(A, B, t[i,0,0], dt, n, N)
     else:

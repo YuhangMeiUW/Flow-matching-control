@@ -50,19 +50,20 @@ if __name__ == '__main__':
     
 
     ## Parameters
-    exp_sys = 'BrownianBridge' # experiment system BrownianBridge, NoisyOscillator, NyquistJohnson, Highdim
+    exp_sys = 'Highdim' # experiment system BrownianBridge, NoisyOscillator, NyquistJohnson, Highdim
     init_dist = 'Gaussian' # initial distribution Gaussian, Circle
-    target_dist = '2G' # 2G, 4G, Circle
+    target_dist = '4G' # 2G, 4G, Circle
     N = 2000 # number of samples
     T = 1000 # number of time steps
     tf = 1.0 # time horizon
 
 
     n_sigma = 1 # noise level
-    n = 2 # state dimension
+    n = 4 # state dimension
     m = int(n/2) # control dimension
 
     # Set System matrices
+    print("Generating system matrices")
     if exp_sys == 'BrownianBridge':
         A = torch.tensor([[0.0, 1.0],[0.0, 0.0]])
         B = torch.tensor([[0.0],[1.0]])
@@ -84,6 +85,7 @@ if __name__ == '__main__':
         raise ValueError('Invalid system name')
     
     # Generate initial and target distributions
+    print("Generating initial and target distributions")
     if init_dist == 'Gaussian':
         x_0 = MultivariateNormal(torch.zeros(n), torch.eye(n)).sample((N,))
     elif init_dist == 'Circle':
@@ -104,7 +106,7 @@ if __name__ == '__main__':
         y[:int(N/4)] = MultivariateNormal(mu_target, torch.eye(n)).sample((int(N/4),))
         y[int(N/4):int(N/2)] = MultivariateNormal(-mu_target, torch.eye(n)).sample((int(N/4),))
         y[int(N/2):int(3*N/4)] = MultivariateNormal(mu_target*rot_vec, torch.eye(n)).sample((int(N/4),))
-        y[int(3*N/4):] = MultivariateNormal(mu_target*rot_vec, torch.eye(n)).sample((int(N/4),))
+        y[int(3*N/4):] = MultivariateNormal(-mu_target*rot_vec, torch.eye(n)).sample((int(N/4),))
     elif target_dist == 'Circle':
         radius = 1
         center = (0, 0)  # Center of the circle
@@ -117,13 +119,15 @@ if __name__ == '__main__':
     dt = t_N[1,0,0] - t_N[0,0,0]
 
     # Generate forward trajectory
+    print("Generating forward trajectory")
     expAt = generate_expAt(A, t_N)
     exp1tAtrans = generate_expAt(A.T, 1-t_N)
     expA = generate_expAt(A, torch.ones_like(t_N))
     exp1tA = generate_expAt(A, 1-t_N)
-    phi_t = generate_phit(t_N, n, A, B, exp_sys)
-    phi_1 = generate_phit(torch.ones_like(t_N), n, A, B, exp_sys)
-    phi_1_t = generate_phit(1-t_N, n, A, B, exp_sys)
+    phi_t = generate_phit(t_N, n, A, B, dt, exp_sys)
+    phi_1 = phi_t[-1].repeat(T, 1, 1, 1)
+    phi_1_t = generate_phit(1-t_N, n, A, B, dt, exp_sys)
+    # phi_1_t = phi_1 - torch.einsum('tnij,tnjk->tnik', exp1tA, torch.einsum('tnij,tnjk->tnik', phi_t, exp1tAtrans))
 
     mat_for_x = expAt - torch.einsum('tnij,tnjk->tnik', torch.einsum('tnij,tnjk->tnik', torch.einsum('tnij,tnjk->tnik', phi_t, exp1tAtrans), torch.linalg.inv(phi_1)), expA)
 
