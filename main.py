@@ -195,8 +195,8 @@ if __name__ == '__main__':
         W_p[i,:,:] = MultivariateNormal(torch.zeros(m), dt*torch.eye(m)).sample((N,))
 
     X_p = torch.zeros(T,N,n)
-    # X_p[0] = torch.randn(N,n)
-    X_p[0] = x_0
+    X_p[0] = torch.randn(N,n)
+    # X_p[0] = x_0 ### used in circle experiment
     for i in range(0,T-1):
         u_pred = model.forward(X_p[i,None,:,:],t_N[i,None,:,:])[0]
         X_p[i+1] = X_p[i] + (A @ X_p[i].T).T * dt + (B @ u_pred.T).T * dt + n_sigma * (B @ W_p[i].T).T
